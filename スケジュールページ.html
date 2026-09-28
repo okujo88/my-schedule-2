@@ -1,0 +1,1621 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>スケジュールページ</title>
+<style>
+* { box-sizing: border-box; margin: 0; padding: 0; }
+body {
+  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Helvetica Neue', Arial, sans-serif;
+  font-size: 14px;
+  color: #37352f;
+  background: #fff;
+  height: 100vh;
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+}
+
+/* ── Page header ── */
+.page-header {
+  padding: 28px 0 16px 248px;
+  flex-shrink: 0;
+  border-bottom: 1px solid #f0efed;
+  display: flex;
+  align-items: flex-end;
+  gap: 16px;
+}
+.page-icon { font-size: 44px; line-height: 1; }
+.page-title { font-size: 32px; font-weight: 700; }
+.sync-badge {
+  margin-left: auto;
+  margin-right: 24px;
+  margin-bottom: 4px;
+  font-size: 11px;
+  color: #9b9a97;
+  display: flex;
+  align-items: center;
+  gap: 5px;
+}
+.sync-dot { width: 7px; height: 7px; border-radius: 50%; background: #4caf50; }
+
+/* ── Layout ── */
+.main-layout {
+  display: flex;
+  flex: 1;
+  overflow: hidden;
+}
+
+/* ── Sidebar ── */
+.sidebar {
+  width: 240px;
+  min-width: 240px;
+  padding: 12px 8px;
+  border-right: 1px solid #e9e9e7;
+  overflow-y: auto;
+  background: #fbfbfa;
+}
+.sidebar-add-btn {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  width: 100%;
+  padding: 6px 10px;
+  margin-bottom: 8px;
+  border: 1px dashed #c9c8c5;
+  border-radius: 4px;
+  background: transparent;
+  cursor: pointer;
+  font-size: 13px;
+  font-family: inherit;
+  color: #6b6b6b;
+  text-align: left;
+}
+.sidebar-add-btn:hover { background: rgba(55,53,47,.06); }
+.sidebar-label {
+  font-size: 11px;
+  font-weight: 600;
+  color: #9b9a97;
+  text-transform: uppercase;
+  letter-spacing: .06em;
+  padding: 4px 10px;
+  margin-bottom: 2px;
+}
+.sidebar-item {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 5px 10px;
+  border-radius: 4px;
+  cursor: pointer;
+  font-size: 14px;
+  color: #37352f;
+  text-decoration: none;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  user-select: none;
+}
+.sidebar-item:hover { background: rgba(55,53,47,.07); }
+.dot { width: 10px; height: 10px; border-radius: 50%; flex-shrink: 0; }
+.sidebar-new {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  padding: 5px 10px;
+  border-radius: 4px;
+  cursor: pointer;
+  font-size: 13px;
+  color: #9b9a97;
+  margin-top: 4px;
+}
+.sidebar-new:hover { background: rgba(55,53,47,.07); color: #37352f; }
+
+/* ── Main content ── */
+.main-content {
+  flex: 1;
+  overflow-y: auto;
+  padding: 20px 28px;
+}
+
+/* ── Calendar section ── */
+.cal-section {
+  margin-bottom: 28px;
+  border: 1px solid #e9e9e7;
+  border-radius: 6px;
+  overflow: hidden;
+}
+.cal-section-header {
+  background: #f7f6f3;
+  padding: 10px 16px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  border-bottom: 1px solid #e9e9e7;
+}
+.cal-section-title { font-size: 15px; font-weight: 600; }
+.cal-view-badge {
+  display: flex;
+  align-items: center;
+  gap: 5px;
+  padding: 3px 10px;
+  border: 1px solid #e3e2e0;
+  border-radius: 4px;
+  background: #fff;
+  font-size: 12px;
+  color: #6b6b6b;
+}
+.cal-toolbar-row {
+  padding: 8px 16px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  border-bottom: 1px solid #e9e9e7;
+}
+.month-label { font-size: 13px; font-weight: 500; color: #37352f; min-width: 160px; }
+.cal-nav { display: flex; align-items: center; gap: 6px; }
+.today-btn {
+  padding: 3px 10px;
+  border: 1px solid #e3e2e0;
+  border-radius: 4px;
+  background: #fff;
+  cursor: pointer;
+  font-size: 13px;
+  font-family: inherit;
+  color: #37352f;
+}
+.today-btn:hover { background: #f1f1ef; }
+.nav-btn {
+  width: 28px; height: 28px;
+  border: 1px solid #e3e2e0;
+  border-radius: 4px;
+  background: #fff;
+  cursor: pointer;
+  font-size: 14px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: #37352f;
+}
+.nav-btn:hover { background: #f1f1ef; }
+
+/* ── Calendar grid ── */
+.cal-grid { display: grid; grid-template-columns: repeat(7, 1fr); }
+.cal-day-header {
+  padding: 7px 4px;
+  text-align: center;
+  font-size: 11px;
+  font-weight: 500;
+  color: #9b9a97;
+  border-right: 1px solid #e9e9e7;
+  letter-spacing: .03em;
+}
+.cal-day-header:last-child { border-right: none; }
+.cal-day-header.sun { color: #e03e3e; }
+.cal-day-header.sat { color: #4a90d9; }
+
+.cal-cell {
+  min-height: 108px;
+  padding: 6px 6px 8px;
+  border-right: 1px solid #e9e9e7;
+  border-top: 1px solid #e9e9e7;
+  cursor: pointer;
+}
+.cal-cell:last-child { border-right: none; }
+.cal-cell:hover { background: rgba(55,53,47,.02); }
+.cal-cell.sun .date-num:not(.today) { color: #e03e3e; }
+.cal-cell.sat .date-num:not(.today) { color: #4a90d9; }
+
+.date-num {
+  font-size: 12px;
+  width: 24px; height: 24px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 50%;
+  margin-bottom: 4px;
+  color: #37352f;
+}
+.date-num.today {
+  background: #e03e3e;
+  color: #fff !important;
+  font-weight: 600;
+}
+
+/* ── Task chips ── */
+.task-chip {
+  padding: 2px 6px;
+  border-radius: 3px;
+  font-size: 11.5px;
+  margin-bottom: 2px;
+  cursor: pointer;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  max-width: 100%;
+  display: flex;
+  align-items: center;
+  gap: 3px;
+}
+.task-chip:hover { opacity: 0.8; }
+.chip-notion-icon { font-size: 9px; flex-shrink: 0; opacity: 0.6; }
+
+/* 確認リストカレンダー用: blue */
+.chip-confirm { background: #dbeafe; color: #1e40af; }
+/* 施策 小町: pink */
+.chip-komachi { background: #fce7f3; color: #9d174d; }
+/* 施策 ボコデコ: green */
+.chip-bokodeko { background: #dcfce7; color: #166534; }
+/* local: gray */
+.chip-local { background: #f1f0ef; color: #37352f; }
+
+/* ── Modal ── */
+.modal-overlay {
+  display: none;
+  position: fixed;
+  inset: 0;
+  background: rgba(0,0,0,.35);
+  z-index: 1000;
+  align-items: center;
+  justify-content: center;
+}
+.modal-overlay.show { display: flex; }
+.modal {
+  background: #fff;
+  border-radius: 8px;
+  padding: 24px;
+  width: 400px;
+  box-shadow: 0 8px 40px rgba(0,0,0,.18);
+}
+.modal-title { font-size: 15px; font-weight: 600; margin-bottom: 4px; }
+.modal-date { font-size: 12px; color: #9b9a97; margin-bottom: 16px; }
+.modal-input {
+  width: 100%;
+  padding: 9px 12px;
+  border: 1px solid #e3e2e0;
+  border-radius: 5px;
+  font-size: 14px;
+  font-family: inherit;
+  outline: none;
+  color: #37352f;
+}
+.modal-input:focus { border-color: #aaa; box-shadow: 0 0 0 2px rgba(0,0,0,.06); }
+
+.notion-link-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  margin-top: 10px;
+  padding: 5px 10px;
+  border-radius: 4px;
+  font-size: 12px;
+  color: #2383e2;
+  background: #f0f7ff;
+  border: 1px solid #c3dafe;
+  cursor: pointer;
+  text-decoration: none;
+  font-family: inherit;
+}
+.notion-link-btn:hover { background: #e0f0ff; }
+.gcal-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  margin-top: 6px;
+  margin-left: 6px;
+  padding: 5px 10px;
+  border-radius: 4px;
+  font-size: 12px;
+  color: #166534;
+  background: #f0fdf4;
+  border: 1px solid #bbf7d0;
+  cursor: pointer;
+  text-decoration: none;
+  font-family: inherit;
+}
+.gcal-btn:hover { background: #dcfce7; }
+.export-btn {
+  display: flex;
+  align-items: center;
+  gap: 5px;
+  padding: 4px 10px;
+  border: 1px solid #e3e2e0;
+  border-radius: 4px;
+  background: #fff;
+  cursor: pointer;
+  font-size: 12px;
+  font-family: inherit;
+  color: #37352f;
+}
+.export-btn:hover { background: #f1f1ef; }
+.gcal-import-btn {
+  display: flex;
+  align-items: center;
+  gap: 5px;
+  padding: 4px 10px;
+  border: 1px solid #bbf7d0;
+  border-radius: 4px;
+  background: #f0fdf4;
+  cursor: pointer;
+  font-size: 12px;
+  font-family: inherit;
+  color: #166534;
+}
+.gcal-import-btn:hover { background: #dcfce7; }
+.gcal-status {
+  font-size: 11px;
+  color: #9b9a97;
+  display: flex;
+  align-items: center;
+  gap: 4px;
+}
+.gcal-status.synced { color: #16a34a; }
+.chip-gcal { background: #fef9c3; color: #854d0e; }
+.modal-wide { width: 480px; }
+.tab-row {
+  display: flex;
+  gap: 0;
+  border: 1px solid #e3e2e0;
+  border-radius: 6px;
+  overflow: hidden;
+  margin-bottom: 16px;
+}
+.tab-btn {
+  flex: 1;
+  padding: 8px 12px;
+  border: none;
+  background: #f7f6f3;
+  cursor: pointer;
+  font-size: 13px;
+  font-family: inherit;
+  color: #6b6b6b;
+  border-right: 1px solid #e3e2e0;
+}
+.tab-btn:last-child { border-right: none; }
+.tab-btn.active { background: #fff; color: #37352f; font-weight: 600; }
+.tab-panel { display: none; }
+.tab-panel.active { display: block; }
+.help-text {
+  font-size: 11px;
+  color: #9b9a97;
+  line-height: 1.6;
+  margin-bottom: 10px;
+  background: #f7f6f3;
+  padding: 8px 10px;
+  border-radius: 4px;
+}
+.help-text ol { padding-left: 16px; margin-top: 4px; }
+.sync-result {
+  font-size: 12px;
+  padding: 8px 10px;
+  border-radius: 4px;
+  margin-top: 10px;
+  display: none;
+}
+.sync-result.ok, .sync-result.success { background: #f0fdf4; color: #166534; border: 1px solid #bbf7d0; display: block; }
+.sync-result.err, .sync-result.error  { background: #fef2f2; color: #991b1b; border: 1px solid #fca5a5; display: block; }
+.sync-result:not(:empty) { display: block; }
+.modal-field-label {
+  font-size: 11px;
+  color: #9b9a97;
+  font-weight: 500;
+  margin-bottom: 4px;
+  display: block;
+  margin-top: 12px;
+}
+.move-note {
+  font-size: 11px;
+  color: #b0a090;
+  margin-top: 6px;
+}
+
+.modal-actions {
+  display: flex;
+  gap: 8px;
+  justify-content: flex-end;
+  margin-top: 16px;
+}
+.btn {
+  padding: 6px 16px;
+  border-radius: 5px;
+  border: none;
+  cursor: pointer;
+  font-size: 13px;
+  font-family: inherit;
+  font-weight: 500;
+}
+.btn-primary { background: #2383e2; color: #fff; }
+.btn-primary:hover { background: #1a6fcc; }
+.btn-danger { background: #ef4444; color: #fff; }
+.btn-danger:hover { background: #dc2626; }
+.btn-cancel { background: #f1f0ef; color: #37352f; }
+.btn-cancel:hover { background: #e3e2e0; }
+
+/* Project modal */
+.proj-modal { width: 340px; }
+.proj-modal .modal-input { margin-bottom: 10px; }
+.color-row { display: flex; gap: 8px; flex-wrap: wrap; margin-bottom: 16px; }
+.color-swatch {
+  width: 24px; height: 24px;
+  border-radius: 50%;
+  cursor: pointer;
+  border: 2px solid transparent;
+}
+.color-swatch.selected { border-color: #37352f; }
+
+/* ── 確認リスト ── */
+.confirm-kpis { display: flex; gap: 8px; }
+.cf-badge { font-size: 11px; padding: 3px 9px; border-radius: 10px; font-weight: 600; background: #f1f0ef; color: #6b6b6b; }
+.cf-badge.warn { background: #fef2f2; color: #c0392b; }
+.cf-badge.today { background: #fff7e6; color: #b8620a; }
+.confirm-body { padding: 16px; }
+.gcal-embed-wrap { background: #fff; }
+.gcal-embed { display: block; }
+.gcal-embed-fallback { padding: 8px 16px; font-size: 12px; color: #9b9a97; text-align: center; border-top: 1px solid #f1f0ef; }
+.confirm-col { margin-bottom: 22px; }
+.confirm-col:last-of-type { margin-bottom: 0; }
+.confirm-col-title { font-size: 13px; font-weight: 600; margin-bottom: 8px; display: flex; align-items: center; gap: 6px; }
+.confirm-sub { font-size: 11px; color: #9b9a97; font-weight: 400; }
+.confirm-addbar { display: flex; gap: 8px; margin-bottom: 10px; flex-wrap: wrap; align-items: center; }
+.confirm-addbar .modal-input { width: auto; padding: 7px 10px; font-size: 13px; }
+.confirm-addbar .cf-who { width: 120px; }
+.confirm-addbar .cf-what { width: 280px; }
+.confirm-addbar .cf-due { width: 150px; }
+.confirm-table { width: 100%; border-collapse: collapse; font-size: 13px; }
+.confirm-table th { text-align: left; font-size: 11px; color: #9b9a97; font-weight: 600; padding: 6px 8px; border-bottom: 1px solid #e9e9e7; }
+.confirm-table td { padding: 7px 8px; border-bottom: 1px solid #f0efed; vertical-align: middle; }
+.confirm-table tr.cf-overdue { background: #fef6f6; }
+.confirm-table tr.cf-overdue td.cf-due { color: #e03e3e; font-weight: 700; }
+.confirm-table tr.cf-today td.cf-due { color: #c2650c; font-weight: 700; }
+.cf-empty { color: #9b9a97; font-size: 12px; text-align: center; padding: 12px 0; }
+.cf-op { text-align: right; white-space: nowrap; }
+.cf-mini { border: none; border-radius: 4px; padding: 3px 8px; font-size: 11px; font-weight: 600; cursor: pointer; margin-left: 4px; }
+.cf-mini-done { background: #dcfce7; color: #166534; }
+.cf-mini-edit { background: #f1f0ef; color: #37352f; }
+.cf-mini-del { background: #fef2f2; color: #991b1b; }
+#confirmSection details { margin-top: 10px; }
+#confirmSection summary { cursor: pointer; font-size: 13px; color: #6b6b6b; font-weight: 600; padding: 4px 0; }
+
+</style>
+</head>
+<body>
+
+<div class="page-header">
+  <div class="page-icon">📅</div>
+  <div class="page-title">スケジュールページ</div>
+  <div class="sync-badge">
+    <span class="sync-dot"></span>
+    <span id="syncLabel">Notionと同期済み 2026-06-16</span>
+  </div>
+</div>
+
+<div class="main-layout">
+  <!-- Sidebar -->
+  <div class="sidebar">
+    <div class="sidebar-label">ページ</div>
+    <div class="sidebar-item" onclick="scrollToSection('today')">📅 本日の予定</div>
+    <div class="sidebar-item" onclick="scrollToSection('sched')">📣 新規施策スケジュール</div>
+    <div class="sidebar-item" onclick="scrollToSection('cfcal')">🗓️ 確認リスト（カレンダー）</div>
+    <div class="sidebar-item" onclick="scrollToSection('confirm')">📋 確認リスト</div>
+    <button class="sidebar-add-btn" onclick="openAddProject()">✏️ プロジェクト追加</button>
+    <div class="sidebar-label">プロジェクト</div>
+    <div id="projectList"></div>
+    <div class="sidebar-new" onclick="openAddProject()">＋ 新規ページ</div>
+  </div>
+
+  <!-- Main -->
+  <div class="main-content">
+    <!-- 本日の予定（Googleカレンダー埋め込み・週表示） -->
+    <div class="cal-section" id="todaySection">
+      <div class="cal-section-header">
+        <div class="cal-section-title">📅 本日の予定</div>
+        <a class="cal-view-badge" href="https://calendar.google.com/calendar/u/0/r/week" target="_blank" rel="noopener">📅 Googleカレンダーで開く ↗</a>
+      </div>
+      <div class="gcal-embed-wrap">
+        <iframe class="gcal-embed" src="https://calendar.google.com/calendar/embed?src=uph3aqlt9cr480mf1q0oav1rjp50t4ld%40import.calendar.google.com&amp;src=okujo%40teinei.co.jp&amp;src=c_77085ebb69f51fa79d1bf9612939e20cdb7c82f8419995e63c15e5f5702139a4%40group.calendar.google.com&amp;src=c_2c827f9827f8a0e67cd9277635200f59945eb08823338eef686fa28d131d4327%40group.calendar.google.com&amp;src=ja.japanese%23holiday%40group.v.calendar.google.com&amp;ctz=Asia%2FTokyo&amp;mode=WEEK&amp;showTitle=0&amp;showPrint=0&amp;showTabs=0&amp;showCalendars=0&amp;showTz=0&amp;wkst=1&amp;bgcolor=%23ffffff" style="border:0" width="100%" height="600" frameborder="0" scrolling="no"></iframe>
+        <div class="gcal-embed-fallback">表示されない場合は、上の「Googleカレンダーで開く」からご自身のGoogleアカウントでご覧ください。</div>
+      </div>
+    </div>
+
+    <!-- 新規施策スケジュール -->
+    <div class="cal-section" id="schedSection">
+      <div class="cal-section-header">
+        <div class="cal-section-title">新規施策スケジュール</div>
+        <div style="display:flex;align-items:center;gap:8px">
+          <div class="cal-view-badge">📅 カレンダービュー</div>
+          <button class="gcal-import-btn" onclick="openGCalModal()">📆 Googleカレンダーからインポート</button>
+          <button class="export-btn" onclick="exportICS()">📥 エクスポート</button>
+          <span class="gcal-status" id="gcalStatus"></span>
+        </div>
+      </div>
+      <div class="cal-toolbar-row">
+        <div class="month-label" id="schedMonthLabel"></div>
+        <div class="cal-nav">
+          <button class="today-btn" onclick="goToday('sched')">今日</button>
+          <button class="nav-btn" onclick="prevWeek('sched')">‹</button>
+          <button class="nav-btn" onclick="nextWeek('sched')">›</button>
+        </div>
+      </div>
+      <div class="cal-grid" id="schedGrid"></div>
+    </div>
+
+    <!-- 確認リスト（カレンダービュー） -->
+    <div class="cal-section" id="cfcalSection">
+      <div class="cal-section-header">
+        <div class="cal-section-title">🗓️ 確認リスト（カレンダー）</div>
+        <div class="cal-view-badge">📅 カレンダービュー</div>
+      </div>
+      <div class="cal-toolbar-row">
+        <div class="month-label" id="cfcalMonthLabel"></div>
+        <div class="cal-nav">
+          <button class="today-btn" onclick="goToday('cfcal')">今日</button>
+          <button class="nav-btn" onclick="prevWeek('cfcal')">‹</button>
+          <button class="nav-btn" onclick="nextWeek('cfcal')">›</button>
+        </div>
+      </div>
+      <div class="cal-grid" id="cfcalGrid"></div>
+    </div>
+
+    <!-- 確認リスト -->
+    <div class="cal-section" id="confirmSection">
+      <div class="cal-section-header">
+        <div class="cal-section-title">確認リスト</div>
+        <div class="confirm-kpis" id="cfKpis"></div>
+      </div>
+      <div class="confirm-body">
+
+        <div class="confirm-col">
+          <div class="confirm-col-title">🔵 自分が確認・返答すること <span class="confirm-sub">相手が自分の返事を待っている</span><span class="confirm-sub" style="margin-left:auto;cursor:pointer;color:#2383e2" onclick="scrollToSection('cfcal')">🗓️ カレンダーで見る</span></div>
+          <div class="confirm-addbar">
+            <input class="modal-input cf-who" id="cf-self-who" placeholder="相手">
+            <input class="modal-input cf-what" id="cf-self-what" placeholder="内容">
+            <input class="modal-input cf-due" type="date" id="cf-self-due">
+            <button class="btn btn-primary" id="cf-self-btn" onclick="cfSubmit('self')">＋ 追加</button>
+            <button class="btn btn-cancel" id="cf-self-cancel" style="display:none" onclick="cfCancelEdit('self')">キャンセル</button>
+          </div>
+          <table class="confirm-table">
+            <thead><tr><th>期限</th><th>相手</th><th>内容</th><th></th></tr></thead>
+            <tbody id="cf-tb-self"></tbody>
+          </table>
+        </div>
+
+        <details id="cf-done-details">
+          <summary>✅ 完了済み（<span id="cf-done-count">0</span>件）</summary>
+          <table class="confirm-table" style="margin-top:8px">
+            <thead><tr><th>完了日</th><th>種別</th><th>相手</th><th>内容</th><th></th></tr></thead>
+            <tbody id="cf-tb-done"></tbody>
+          </table>
+        </details>
+
+        <div style="display:flex;justify-content:flex-end;gap:8px;margin-top:12px">
+          <button class="export-btn" onclick="cfExportJSON()">💾 バックアップ保存(JSON)</button>
+          <label class="export-btn" style="cursor:pointer">📂 読み込み<input type="file" accept=".json" style="display:none" onchange="cfImportJSON(event)"></label>
+        </div>
+
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- Task modal -->
+<div class="modal-overlay" id="taskModal" onclick="closeTaskModal(event)">
+  <div class="modal" onclick="event.stopPropagation()">
+    <div class="modal-title" id="taskModalTitle">タスクを追加</div>
+    <div class="modal-date" id="taskModalDate"></div>
+    <input class="modal-input" id="taskInput" type="text" placeholder="タイトルを入力..." />
+    <div id="dateChangeRow" style="display:none">
+      <label class="modal-field-label">日付</label>
+      <input class="modal-input" id="taskDateInput" type="date" />
+      <div class="move-note" id="movNote" style="display:none">※ Notionは変更されません（ローカルのみ移動）</div>
+    </div>
+    <div id="notionLinkRow"></div>
+    <div class="modal-actions">
+      <button class="btn btn-cancel" onclick="closeTaskModal()">キャンセル</button>
+      <button class="btn btn-danger" id="taskDeleteBtn" onclick="deleteTask()" style="display:none">削除</button>
+      <button class="btn btn-primary" onclick="saveTask()">保存</button>
+    </div>
+  </div>
+</div>
+
+<!-- Google Calendar modal -->
+<div class="modal-overlay" id="gcalModal" onclick="closeGCalModal(event)">
+  <div class="modal modal-wide" onclick="event.stopPropagation()">
+    <div class="modal-title">📆 Googleカレンダーからインポート</div>
+    <div class="modal-date" style="margin-bottom:12px">施策スケジュールに反映します</div>
+
+    <!-- URL同期 -->
+    <div style="font-size:12px;font-weight:600;color:#37352f;margin-bottom:8px">🔗 iCal URLで同期</div>
+    <div id="calUrlList" style="margin-bottom:10px"></div>
+    <button class="btn btn-primary" onclick="syncAllUrls()" style="width:100%;margin-bottom:16px">🔄 URLから一括同期する</button>
+
+    <div style="font-size:12px;color:#9b9a97;text-align:center;margin-bottom:12px">── またはファイルから ──</div>
+
+    <!-- ファイル選択 -->
+    <input type="file" id="icsFileInput" accept=".ics" multiple style="display:none" onchange="handleICSFile(event)" />
+    <button class="btn" onclick="document.getElementById('icsFileInput').click()" style="width:100%;background:#f3f4f6;color:#374151">
+      📁 ICSファイルを選択…（複数同時選択可）
+    </button>
+
+    <div class="sync-result" id="syncResult"></div>
+
+    <div class="modal-actions" style="justify-content:space-between;margin-top:16px">
+      <button class="btn btn-danger" id="gcalClearBtn" onclick="clearGCalEvents()" style="display:none">インポート済みデータを削除</button>
+      <button class="btn btn-cancel" onclick="closeGCalModal()" style="margin-left:auto">閉じる</button>
+    </div>
+  </div>
+</div>
+
+<!-- Project modal -->
+<div class="modal-overlay" id="projModal" onclick="closeProjModal(event)">
+  <div class="modal proj-modal" onclick="event.stopPropagation()">
+    <div class="modal-title" id="projModalTitle">プロジェクトを追加</div>
+    <div class="modal-date" style="margin-bottom:8px">プロジェクト名</div>
+    <input class="modal-input" id="projNameInput" type="text" placeholder="プロジェクト名..." />
+    <div class="modal-date" style="margin-top:4px">URL（任意）</div>
+    <input class="modal-input" id="projUrlInput" type="text" placeholder="https://..." />
+    <div class="modal-date" style="margin-top:10px;margin-bottom:6px">色</div>
+    <div class="color-row" id="colorRow"></div>
+    <div class="modal-actions">
+      <button class="btn btn-cancel" onclick="closeProjModal()">キャンセル</button>
+      <button class="btn btn-danger" id="projDeleteBtn" onclick="deleteProject()" style="display:none">削除</button>
+      <button class="btn btn-primary" onclick="saveProject()">保存</button>
+    </div>
+  </div>
+</div>
+
+<script>
+// ── Constants ──────────────────────────────────────
+const TODAY = new Date(); TODAY.setHours(0,0,0,0);
+const DAY_NAMES  = ['日','月','火','水','木','金','土'];
+const MONTH_NAMES = ['1月','2月','3月','4月','5月','6月','7月','8月','9月','10月','11月','12月'];
+const PALETTE = ['#ff7c7c','#ff9f40','#ffe066','#a9e34b','#4ecdc4','#74c0fc','#c77dff','#f78fb3','#b0b0b0','#a0522d'];
+
+// ── Notion-synced data (updated 2026-06-16) ────────
+// Task format: {t: title, u?: notionUrl, c?: category}
+const NOTION_TASKS = {
+  // 新規施策予定
+  'sched_2026-04-07': [{t:'りさねーぜさん◆リール投稿',  u:'https://app.notion.com/p/33a81f0e412f8038bf2fd93c912135f0', c:'小町'}],
+  'sched_2026-04-09': [{t:'かんだまさん◆YouTube',       u:'https://app.notion.com/p/33a81f0e412f80c29620fd7b089381b7', c:'小町'}],
+  'sched_2026-04-20': [{t:'ポメさん◆NAPBIZ投稿',         u:'https://app.notion.com/p/33a81f0e412f803d9fa0e8f10b5097fb', c:'小町'}],
+  'sched_2026-04-23': [{t:'乙黒えりさん◆リール投稿',    u:'https://app.notion.com/p/33a81f0e412f80c8a47cd936ae3ae7f8', c:'ボコデコ'}],
+  'sched_2026-04-24': [{t:'ぷにらーさん◆NAPBIZ投稿',     u:'https://app.notion.com/p/33a81f0e412f8044a6f9cfd49b1eb5da', c:'小町'}],
+  'sched_2026-05-13': [{t:'たこ/tacoさん◆NAPBIZ投稿',   u:'https://app.notion.com/p/35981f0e412f801399c8cfd95024ec9d', c:'小町'}],
+  'sched_2026-05-14': [{t:'NADEAさん◆IGライブ',          u:'https://app.notion.com/p/34f81f0e412f80fca761eeeaab53a7b2', c:'小町'}],
+  'sched_2026-05-15': [{t:'しいこさん◆NAPBIZ投稿',       u:'https://app.notion.com/p/35981f0e412f802688d3e834635ee0fa', c:'小町'}],
+  'sched_2026-05-22': [{t:'HYPかなこさん◆NAPBIZ投稿',   u:'https://app.notion.com/p/35981f0e412f80ddafd3fc5f1aed4b8e', c:'小町'}],
+  'sched_2026-05-25': [{t:'カホまんじゅうさん◆NAPBIZ投稿', u:'https://app.notion.com/p/35981f0e412f80ecaccfd9f6a620297f', c:'小町'}],
+  'sched_2026-05-26': [{t:'亜希さん◆IGLIVE',             u:'https://app.notion.com/p/36481f0e412f8022813ad815bf5cb795', c:'小町'}],
+  'sched_2026-05-29': [
+    {t:'Yukariさん◆IGLIVE',  u:'https://app.notion.com/p/34f81f0e412f806ca480de5791ccf6c3', c:'小町'},
+    {t:'mikiさん◆リール投稿', u:'https://app.notion.com/p/36b81f0e412f8039a6aec105d4b7206e', c:'ボコデコ'},
+  ],
+  'sched_2026-06-02': [{t:'さまんささん◆IGLIVE',          u:'https://app.notion.com/p/35981f0e412f80598498dae29b962c27', c:'小町'}],
+  'sched_2026-06-17': [{t:'ろみさん◆NAPBIZ投稿',          u:'https://app.notion.com/p/37281f0e412f80849cdafe67aefd133f', c:'小町'}],
+  'sched_2026-06-18': [{t:'まめっこさん◆NAPBIZ投稿',      u:'https://app.notion.com/p/37281f0e412f804e9c39e874ceb445be', c:'小町'}],
+  'sched_2026-06-19': [{t:'アラフォーの正解のない話◆podcast③', u:'https://app.notion.com/p/37281f0e412f8075b2ffdd385ee19eca', c:'小町'}],
+  'sched_2026-06-23': [{t:'まるさん◆NAPBIZ投稿',          u:'https://app.notion.com/p/37281f0e412f80f18e81ced2c43de479', c:'小町'}],
+  'sched_2026-06-24': [
+    {t:'あずまさん◆NAPBIZ投稿',            u:'https://app.notion.com/p/37281f0e412f8054a736d289d204eebe', c:'小町'},
+    {t:'アラフォーの正解のない話◆podcast④', u:'https://app.notion.com/p/37281f0e412f8044b976ea4909cca346', c:'小町'},
+    {t:'楽女ニュース◆カルーセル',          u:'https://app.notion.com/p/37281f0e412f802a8faeee7eca26755d', c:'小町'},
+  ],
+  'sched_2026-06-26': [{t:'きちやんさん◆NAPBIZ投稿',      u:'https://app.notion.com/p/37281f0e412f8013842cee8960837332', c:'小町'}],
+  'sched_2026-06-27': [{t:'futaba◆YouTube投稿',           u:'https://app.notion.com/p/37281f0e412f8082b730c06d8118a89a', c:'小町'}],
+  'sched_2026-06-29': [{t:'きょうこ先生◆voicy',           u:'https://app.notion.com/p/37281f0e412f808db39cdd3477d07007', c:'小町'}],
+  'sched_2026-07-01': [{t:'植野ありさ◆YouTube',           u:'https://app.notion.com/p/37281f0e412f80db8f56f9273f6dabac', c:'小町'}],
+};
+
+// ── State ──────────────────────────────────────────
+const weekOffset = { sched: 0, cfcal: 0 };
+
+const DEFAULT_PROJECTS = [
+  { name:'社長',        color:'#ff7c7c', url:'https://app.notion.com/p/32581f0e412f806aa6fac16a2da2a53b' },
+  { name:'リーダー',   color:'#4ecdc4', url:'https://app.notion.com/p/32581f0e412f80d48c4ae7e3bb3e091a' },
+  { name:'経営',        color:'#ffe066', url:'https://app.notion.com/p/32581f0e412f80208e27ccba1625f9e8' },
+  { name:'面談議事録', color:'#ff9f40', url:'https://app.notion.com/p/32581f0e412f80238c5bf2ca29678ee5' },
+  { name:'全体朝礼',   color:'#c77dff', url:'https://app.notion.com/p/32581f0e412f80be8d65e43d84153785' },
+  { name:'総務',        color:'#ff9f40', url:'https://app.notion.com/p/32581f0e412f8098a157fbe3e434254b' },
+  { name:'MEMO',        color:'#ffe066', url:'https://app.notion.com/p/32581f0e412f80f59159c16c7ec04f97' },
+  { name:'TODOリストDB',color:'#b0b0b0', url:'https://app.notion.com/p/32581f0e412f801f8a68f3b4c4cf60b5' },
+];
+
+let projects    = JSON.parse(localStorage.getItem('sch_projects')      || 'null') || DEFAULT_PROJECTS;
+let localTasks  = JSON.parse(localStorage.getItem('sch_local_tasks')   || '{}');
+let hiddenNotion= JSON.parse(localStorage.getItem('sch_hidden_notion') || '{}');
+let gcalEvents  = JSON.parse(localStorage.getItem('sch_gcal_events')   || '{}');
+
+function saveProjects()    { localStorage.setItem('sch_projects',      JSON.stringify(projects)); }
+function saveLocalTasks()  { localStorage.setItem('sch_local_tasks',   JSON.stringify(localTasks)); }
+function saveHiddenNotion(){ localStorage.setItem('sch_hidden_notion', JSON.stringify(hiddenNotion)); }
+function saveGCalEvents()  { localStorage.setItem('sch_gcal_events',   JSON.stringify(gcalEvents)); }
+
+// Merge Notion tasks + local tasks + gcalEvents; each item carries _src/_origIdx/_localIdx metadata
+function getTasksForKey(key) {
+  const notionRaw = NOTION_TASKS[key] || [];
+  const notion = [];
+  notionRaw.forEach((item, i) => {
+    if (!hiddenNotion[`${key}|${i}`]) {
+      notion.push({...item, _src:'notion', _origIdx:i});
+    }
+  });
+  const local = (localTasks[key] || []).map((item, i) => ({
+    ...(typeof item === 'string' ? {t:item} : item),
+    _src:'local', _localIdx:i
+  }));
+  const existingTitles = new Set([...notion, ...local].map(item => item.t));
+  const gcal = key.startsWith('sched_')
+    ? (gcalEvents[key.slice(6)] || [])
+        .filter(t => !existingTitles.has(t))
+        .map(t => ({t, _src:'gcal'}))
+    : [];
+  return [...notion, ...local, ...gcal];
+}
+
+// ── Chip class ────────────────────────────────────
+function chipClass(calKey, task) {
+  if (task._src === 'gcal') return 'chip-gcal';
+  if (!task.u) return 'chip-local';
+  if (task.c === 'ボコデコ') return 'chip-bokodeko';
+  return 'chip-komachi';
+}
+
+// ── Date helpers ──────────────────────────────────
+function toDateStr(d) {
+  return `${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,'0')}-${String(d.getDate()).padStart(2,'0')}`;
+}
+function addDays(d, n) { const r = new Date(d); r.setDate(r.getDate() + n); return r; }
+function isSameDay(a, b) {
+  return a.getFullYear()===b.getFullYear() && a.getMonth()===b.getMonth() && a.getDate()===b.getDate();
+}
+function getSunday(d) { const r = new Date(d); r.setDate(r.getDate() - r.getDay()); return r; }
+function weekStart(calKey) {
+  const s = getSunday(TODAY);
+  s.setDate(s.getDate() + weekOffset[calKey] * 7);
+  return s;
+}
+function formatJpDate(d) {
+  return `${d.getFullYear()}年${d.getMonth()+1}月${d.getDate()}日（${DAY_NAMES[d.getDay()]}）`;
+}
+
+// ── Sidebar ───────────────────────────────────────
+function renderProjects() {
+  document.getElementById('projectList').innerHTML = projects.map((p, i) => `
+    <div class="sidebar-item" onclick="handleProjectClick(event,${i})">
+      <span class="dot" style="background:${p.color}"></span>
+      <span>${escHtml(p.name)}</span>
+    </div>`).join('');
+}
+
+function handleProjectClick(e, i) {
+  const p = projects[i];
+  if (e.detail === 2) { openEditProject(i); return; }
+  if (p.url) window.open(p.url, '_blank');
+  else openEditProject(i);
+}
+
+// ── Calendar render ───────────────────────────────
+function renderCalendar(calKey) {
+  const dates = Array.from({length:7}, (_, i) => addDays(weekStart(calKey), i));
+  const start = dates[0], end = dates[6];
+
+  let label = `${start.getFullYear()}年${MONTH_NAMES[start.getMonth()]}`;
+  if (start.getMonth() !== end.getMonth()) {
+    const ySuffix = end.getFullYear() !== start.getFullYear() ? `${end.getFullYear()}年` : '';
+    label += ` - ${ySuffix}${MONTH_NAMES[end.getMonth()]}`;
+  }
+  document.getElementById(`${calKey}MonthLabel`).textContent = label;
+
+  const headers = DAY_NAMES.map((d, i) =>
+    `<div class="cal-day-header ${i===0?'sun':i===6?'sat':''}">${d}</div>`
+  ).join('');
+
+  const cells = dates.map((d, i) => {
+    const ds     = toDateStr(d);
+    const key    = `${calKey}_${ds}`;
+    const items  = getTasksForKey(key);
+    const dayClass = i===0 ? 'sun' : i===6 ? 'sat' : '';
+    const todayCls = isSameDay(d, TODAY) ? ' today' : '';
+
+    const chips = items.map((task, ti) => {
+      const item   = typeof task === 'string' ? {t: task} : task;
+      const cls    = chipClass(calKey, item);
+      const icon   = item.u ? '<span class="chip-notion-icon">N</span>' : '';
+      return `<div class="task-chip ${cls}" onclick="openEditTask(event,'${key}',${ti})">${icon}${escHtml(item.t)}</div>`;
+    }).join('');
+
+    return `<div class="cal-cell ${dayClass}" onclick="openAddTask('${calKey}','${ds}')">
+      <div class="date-num${todayCls}">${d.getDate()}</div>
+      ${chips}
+    </div>`;
+  }).join('');
+
+  document.getElementById(`${calKey}Grid`).innerHTML = headers + cells;
+}
+
+function prevWeek(k) { weekOffset[k]--; if (k === 'cfcal') renderCfCalendar(); else renderCalendar(k); }
+function nextWeek(k) { weekOffset[k]++; if (k === 'cfcal') renderCfCalendar(); else renderCalendar(k); }
+function goToday(k)  { weekOffset[k]=0; if (k === 'cfcal') renderCfCalendar(); else renderCalendar(k); }
+
+// ── Task modal ────────────────────────────────────
+let taskCtx = null;
+
+function openAddTask(calKey, ds) {
+  taskCtx = { calKey, ds, editIdx: -1, item: null };
+  document.getElementById('taskModalTitle').textContent = 'タスクを追加';
+  document.getElementById('taskModalDate').textContent  = formatJpDate(new Date(ds.replace(/-/g,'/')));
+  document.getElementById('taskInput').value = '';
+  document.getElementById('taskInput').readOnly = false;
+  document.getElementById('taskInput').style.background = '';
+  document.getElementById('taskDeleteBtn').style.display = 'none';
+  document.getElementById('notionLinkRow').innerHTML = '';
+  // Date picker: show for TODO only
+  const dcr = document.getElementById('dateChangeRow');
+  if (calKey === 'todo') {
+    dcr.style.display = 'block';
+    document.getElementById('taskDateInput').value = ds;
+    document.getElementById('movNote').style.display = 'none';
+  } else {
+    dcr.style.display = 'none';
+  }
+  document.getElementById('taskModal').classList.add('show');
+  setTimeout(() => document.getElementById('taskInput').focus(), 60);
+}
+
+function openEditTask(e, key, idx) {
+  e.stopPropagation();
+  const calKey   = key.startsWith('sched') ? 'sched' : 'todo';
+  const ds       = key.slice(calKey.length + 1);
+  const allItems = getTasksForKey(key);
+  const task     = allItems[idx]; // has _src, _origIdx or _localIdx
+
+  taskCtx = { calKey, ds, key, editIdx: idx, item: task };
+
+  const isNotion = task._src === 'notion';
+  document.getElementById('taskModalTitle').textContent = isNotion ? 'Notionアイテム' : 'タスクを編集';
+  document.getElementById('taskModalDate').textContent  = formatJpDate(new Date(ds.replace(/-/g,'/')));
+  document.getElementById('taskInput').value      = task.t;
+  document.getElementById('taskInput').readOnly   = isNotion;
+  document.getElementById('taskInput').style.background = isNotion ? '#f9f9f8' : '';
+  document.getElementById('taskDeleteBtn').style.display = isNotion ? 'none' : 'inline-block';
+
+  // Date picker for TODO
+  const dcr = document.getElementById('dateChangeRow');
+  if (calKey === 'todo') {
+    dcr.style.display = 'block';
+    document.getElementById('taskDateInput').value = ds;
+    document.getElementById('movNote').style.display = isNotion ? 'block' : 'none';
+  } else {
+    dcr.style.display = 'none';
+  }
+
+  // Action buttons row
+  const linkRow = document.getElementById('notionLinkRow');
+  let html = '';
+  if (task.u) html += `<a class="notion-link-btn" href="${escHtml(task.u)}" target="_blank">🔗 Notionで開く</a>`;
+  if (calKey === 'sched') {
+    html += `<button class="gcal-btn" onclick="addToGCal('${escHtml(task.t).replace(/'/g,"\\'")}','${ds}')">📅 Googleカレンダーに追加</button>`;
+  }
+  linkRow.innerHTML = html;
+
+  document.getElementById('taskModal').classList.add('show');
+  if (!isNotion) setTimeout(() => document.getElementById('taskInput').focus(), 60);
+}
+
+function saveTask() {
+  const { calKey, ds, key, editIdx, item } = taskCtx;
+  const val     = document.getElementById('taskInput').value.trim();
+  const newDate = calKey === 'todo' ? document.getElementById('taskDateInput').value : ds;
+  const dateChanged = newDate && newDate !== ds;
+
+  // Adding new item
+  if (editIdx < 0) {
+    if (!val) { closeTaskModal(); return; }
+    const storeKey = `${calKey}_${newDate || ds}`;
+    if (!localTasks[storeKey]) localTasks[storeKey] = [];
+    localTasks[storeKey].push({t: val});
+    saveLocalTasks();
+    closeTaskModal();
+    renderCalendar(calKey);
+    return;
+  }
+
+  const isNotion = item._src === 'notion';
+
+  // Date move
+  if (dateChanged) {
+    moveTask(key, item, newDate, calKey);
+    closeTaskModal();
+    renderCalendar(calKey);
+    return;
+  }
+
+  // Title edit (local items only)
+  if (!isNotion && val) {
+    const storeKey = key;
+    if (!localTasks[storeKey]) localTasks[storeKey] = [];
+    localTasks[storeKey][item._localIdx] = {t: val, ...(item.u ? {u: item.u} : {}), ...(item.c ? {c: item.c} : {})};
+    saveLocalTasks();
+  }
+
+  closeTaskModal();
+  renderCalendar(calKey);
+}
+
+function moveTask(oldKey, task, newDateStr, calKey) {
+  const newKey  = `${calKey}_${newDateStr}`;
+  const itemCopy = {t: task.t};
+  if (task.u) itemCopy.u = task.u;
+  if (task.c) itemCopy.c = task.c;
+
+  if (task._src === 'notion') {
+    hiddenNotion[`${oldKey}|${task._origIdx}`] = true;
+    saveHiddenNotion();
+  } else {
+    const arr = localTasks[oldKey] || [];
+    arr.splice(task._localIdx, 1);
+    if (!arr.length) delete localTasks[oldKey];
+    else localTasks[oldKey] = arr;
+  }
+
+  if (!localTasks[newKey]) localTasks[newKey] = [];
+  localTasks[newKey].push(itemCopy);
+  saveLocalTasks();
+}
+
+function deleteTask() {
+  const { calKey, key, item } = taskCtx;
+  if (item._src === 'notion') { closeTaskModal(); return; }
+  const arr = localTasks[key] || [];
+  arr.splice(item._localIdx, 1);
+  if (!arr.length) delete localTasks[key];
+  else localTasks[key] = arr;
+  saveLocalTasks();
+  closeTaskModal();
+  renderCalendar(calKey);
+}
+
+function closeTaskModal(e) {
+  if (e && e.target !== document.getElementById('taskModal')) return;
+  document.getElementById('taskInput').readOnly = false;
+  document.getElementById('taskInput').style.background = '';
+  document.getElementById('taskModal').classList.remove('show');
+  taskCtx = null;
+}
+
+document.getElementById('taskInput').addEventListener('keydown', e => {
+  if (e.key === 'Enter') saveTask();
+  if (e.key === 'Escape') closeTaskModal();
+});
+
+// ── Project modal ─────────────────────────────────
+let projCtx = null;
+let selectedColor = PALETTE[0];
+
+function buildColorRow(current) {
+  selectedColor = current;
+  document.getElementById('colorRow').innerHTML = PALETTE.map(c => `
+    <div class="color-swatch ${c===current?'selected':''}"
+      style="background:${c}"
+      onclick="selectColor('${c}')"></div>`).join('');
+}
+
+function selectColor(c) { selectedColor = c; buildColorRow(c); }
+
+function openAddProject() {
+  projCtx = { editIdx: -1 };
+  document.getElementById('projModalTitle').textContent = 'プロジェクトを追加';
+  document.getElementById('projNameInput').value = '';
+  document.getElementById('projUrlInput').value  = '';
+  document.getElementById('projDeleteBtn').style.display = 'none';
+  buildColorRow(PALETTE[projects.length % PALETTE.length]);
+  document.getElementById('projModal').classList.add('show');
+  setTimeout(() => document.getElementById('projNameInput').focus(), 60);
+}
+
+function openEditProject(i) {
+  const p = projects[i];
+  projCtx = { editIdx: i };
+  document.getElementById('projModalTitle').textContent = 'プロジェクトを編集';
+  document.getElementById('projNameInput').value = p.name;
+  document.getElementById('projUrlInput').value  = p.url || '';
+  document.getElementById('projDeleteBtn').style.display = 'inline-block';
+  buildColorRow(p.color);
+  document.getElementById('projModal').classList.add('show');
+  setTimeout(() => document.getElementById('projNameInput').focus(), 60);
+}
+
+function saveProject() {
+  const name = document.getElementById('projNameInput').value.trim();
+  if (!name) return;
+  const url   = document.getElementById('projUrlInput').value.trim();
+  const entry = { name, color: selectedColor, url };
+  if (projCtx.editIdx >= 0) projects[projCtx.editIdx] = entry;
+  else projects.push(entry);
+  saveProjects();
+  closeProjModal();
+  renderProjects();
+}
+
+function deleteProject() {
+  if (!confirm(`「${projects[projCtx.editIdx].name}」を削除しますか？`)) return;
+  projects.splice(projCtx.editIdx, 1);
+  saveProjects();
+  closeProjModal();
+  renderProjects();
+}
+
+function closeProjModal(e) {
+  if (e && e.target !== document.getElementById('projModal')) return;
+  document.getElementById('projModal').classList.remove('show');
+  projCtx = null;
+}
+
+document.getElementById('projNameInput').addEventListener('keydown', e => {
+  if (e.key === 'Enter') saveProject();
+  if (e.key === 'Escape') closeProjModal();
+});
+
+// ── Google Calendar / iCal ────────────────────────
+function addToGCal(title, dateStr) {
+  const d = dateStr.replace(/-/g, '');
+  const next = new Date(dateStr.replace(/-/g, '/'));
+  next.setDate(next.getDate() + 1);
+  const end = toDateStr(next).replace(/-/g, '');
+  const url = `https://www.google.com/calendar/render?action=TEMPLATE&text=${encodeURIComponent(title)}&dates=${d}/${end}`;
+  window.open(url, '_blank');
+}
+
+function exportICS() {
+  const lines = [
+    'BEGIN:VCALENDAR',
+    'VERSION:2.0',
+    'PRODID:-//スケジュールページ//JP',
+    'CALSCALE:GREGORIAN',
+  ];
+
+  // Collect all sched keys (Notion + local)
+  const allSchedKeys = new Set([
+    ...Object.keys(NOTION_TASKS).filter(k => k.startsWith('sched_')),
+    ...Object.keys(localTasks).filter(k => k.startsWith('sched_')),
+  ]);
+
+  allSchedKeys.forEach(key => {
+    const dateStr = key.slice(6); // 'sched_2026-06-17' → '2026-06-17'
+    const icsDate = dateStr.replace(/-/g, '');
+    const next    = new Date(dateStr.replace(/-/g, '/'));
+    next.setDate(next.getDate() + 1);
+    const icsEnd  = toDateStr(next).replace(/-/g, '');
+
+    getTasksForKey(key).forEach(task => {
+      const title   = task.t.replace(/\\/g,'\\\\').replace(/,/g,'\\,').replace(/\n/g,'\\n');
+      const cat     = task.c ? `CATEGORIES:${task.c}\r\n` : '';
+      lines.push(
+        'BEGIN:VEVENT',
+        `DTSTART;VALUE=DATE:${icsDate}`,
+        `DTEND;VALUE=DATE:${icsEnd}`,
+        `SUMMARY:${title}`,
+        cat.trimEnd(),
+        'END:VEVENT',
+      );
+    });
+  });
+
+  lines.push('END:VCALENDAR');
+  const ics  = lines.filter(l => l !== '').join('\r\n');
+  const blob = new Blob([ics], { type: 'text/calendar;charset=utf-8' });
+  const url  = URL.createObjectURL(blob);
+  const a    = document.createElement('a');
+  a.href = url; a.download = '新規施策スケジュール.ics';
+  a.click();
+  URL.revokeObjectURL(url);
+}
+
+// ── Google Calendar Import ─────────────────────────
+function openGCalModal() {
+  const modal = document.getElementById('gcalModal');
+  modal.classList.add('show');
+  const hasData = Object.keys(gcalEvents).length > 0;
+  document.getElementById('gcalClearBtn').style.display = hasData ? 'inline-block' : 'none';
+  const count = Object.values(gcalEvents).reduce((s, arr) => s + arr.length, 0);
+  document.getElementById('gcalStatus').textContent = hasData ? `${count}件インポート済` : '';
+  setSyncResult('', '');
+
+  // URLリスト描画
+  const listEl = document.getElementById('calUrlList');
+  if (listEl) {
+    listEl.innerHTML = EMBED_CALENDARS.map(cal =>
+      `<div style="display:flex;align-items:center;gap:8px;font-size:12px;color:#374151;padding:4px 0;border-bottom:1px solid #f3f4f6">
+        <span style="flex:1">📅 ${escHtml(cal.label)}</span>
+        <span class="cal-url-status" style="min-width:20px;text-align:center">—</span>
+      </div>`
+    ).join('');
+  }
+}
+
+function closeGCalModal(e) {
+  if (e && e.target !== document.getElementById('gcalModal')) return;
+  document.getElementById('gcalModal').classList.remove('show');
+}
+
+function switchTab(tab) {
+  document.querySelectorAll('.tab-btn').forEach((b,i) => {
+    b.classList.toggle('active', (i===0 && tab==='file') || (i===1 && tab==='url'));
+  });
+  document.getElementById('tabFile').classList.toggle('active', tab === 'file');
+  document.getElementById('tabUrl').classList.toggle('active', tab === 'url');
+}
+
+function setSyncResult(msg, type) {
+  const el = document.getElementById('syncResult');
+  el.textContent = msg;
+  el.className = 'sync-result' + (type ? ' ' + type : '');
+}
+
+function parseICS(text) {
+  // Returns { 'YYYY-MM-DD': ['event title', ...], ... }
+
+  // Normalize line endings and unfold folded lines (RFC 5545: CRLF + space/tab = continuation)
+  const unfolded = text
+    .replace(/\r\n/g, '\n')
+    .replace(/\r/g, '\n')
+    .replace(/\n[ \t]/g, ''); // unfold
+
+  const result = {};
+  const blocks = unfolded.split('BEGIN:VEVENT');
+  blocks.shift(); // remove VCALENDAR header
+
+  blocks.forEach(block => {
+    // SUMMARY may have property params: SUMMARY;LANGUAGE=ja:タイトル
+    const summaryMatch = block.match(/^SUMMARY(?:[^:\n]*):(.+)/m);
+    // DTSTART covers: DTSTART:20260616 / DTSTART;VALUE=DATE:20260616 / DTSTART;TZID=...:20260616T090000
+    const dtMatch = block.match(/^DTSTART(?:[^:\n]*):(\d{8})/m);
+    if (!summaryMatch || !dtMatch) return;
+
+    // Unescape ICS text: \n → space, \, → ,, \\ → \
+    const title = summaryMatch[1].trim()
+      .replace(/\\n/g, ' ')
+      .replace(/\\,/g, ',')
+      .replace(/\\;/g, ';')
+      .replace(/\\\\/g, '\\');
+
+    const raw = dtMatch[1]; // first 8 digits = YYYYMMDD
+    const dateStr = `${raw.slice(0,4)}-${raw.slice(4,6)}-${raw.slice(6,8)}`;
+    if (!result[dateStr]) result[dateStr] = [];
+    if (!result[dateStr].includes(title)) result[dateStr].push(title);
+  });
+  return result;
+}
+
+function applyGCalEvents(parsed) {
+  let total = 0;
+  Object.entries(parsed).forEach(([date, titles]) => {
+    gcalEvents[date] = titles;
+    total += titles.length;
+  });
+  saveGCalEvents();
+  renderCalendar('sched');
+  const count = Object.values(gcalEvents).reduce((s, a) => s + a.length, 0);
+  document.getElementById('gcalStatus').textContent = `${count}件インポート済`;
+  document.getElementById('gcalClearBtn').style.display = 'inline-block';
+  setSyncResult(`✅ ${total}件のイベントをインポートしました`, 'success');
+}
+
+function handleICSFile(e) {
+  const files = Array.from(e.target.files);
+  if (!files.length) return;
+  setSyncResult(`読み込み中… (0/${files.length})`, '');
+
+  gcalEvents = {}; // インポート開始時に一度だけリセット
+  const allParsed = {};
+  let done = 0;
+
+  files.forEach(file => {
+    const reader = new FileReader();
+    reader.onload = ev => {
+      try {
+        const parsed = parseICS(ev.target.result);
+        Object.entries(parsed).forEach(([date, titles]) => {
+          allParsed[date] = [...(allParsed[date] || []), ...titles];
+        });
+      } catch(err) {
+        console.error('[ICS] parse error:', err);
+      }
+      done++;
+      setSyncResult(`読み込み中… (${done}/${files.length})`, '');
+      if (done === files.length) {
+        const total = Object.values(allParsed).reduce((s, a) => s + a.length, 0);
+        if (total === 0) { setSyncResult('⚠️ イベントが見つかりませんでした', 'error'); return; }
+        applyGCalEvents(allParsed);
+      }
+    };
+    reader.onerror = () => {
+      done++;
+      if (done === files.length) setSyncResult('❌ ファイルの読み取りに失敗しました', 'error');
+    };
+    reader.readAsText(file, 'UTF-8');
+  });
+
+  e.target.value = '';
+}
+
+// 連携カレンダー一覧
+const EMBED_CALENDARS = [
+  { label: '新規施策カレンダー', url: 'https://calendar.google.com/calendar/ical/c_2c827f9827f8a0e67cd9277635200f59945eb08823338eef686fa28d131d4327%40group.calendar.google.com/public/basic.ics' },
+  { label: '奥条個人カレンダー', url: 'https://calendar.google.com/calendar/ical/okujo%40teinei.co.jp/public/basic.ics' },
+  { label: '3つ目のカレンダー',  url: 'https://calendar.google.com/calendar/ical/c_77085ebb69f51fa79d1bf9612939e20cdb7c82f8419995e63c15e5f5702139a4%40group.calendar.google.com/public/basic.ics' },
+];
+
+const GCAL_PROXIES = [
+  u => `https://api.allorigins.win/raw?url=${encodeURIComponent(u)}`,
+  u => `https://corsproxy.io/?url=${encodeURIComponent(u)}`,
+  u => `https://thingproxy.freeboard.io/fetch/${u}`,
+];
+
+async function fetchViaProxy(icsUrl) {
+  for (const makeUrl of GCAL_PROXIES) {
+    try {
+      const res = await fetch(makeUrl(icsUrl));
+      if (!res.ok) continue;
+      const t = await res.text();
+      if (t.includes('BEGIN:VCALENDAR')) return t;
+    } catch(_) {}
+  }
+  return null;
+}
+
+async function syncAllUrls() {
+  setSyncResult('同期中…', '');
+  const statuses = document.querySelectorAll('.cal-url-status');
+  statuses.forEach(el => { el.textContent = '⏳'; });
+
+  let totalParsed = {};
+  let errors = [];
+
+  for (let i = 0; i < EMBED_CALENDARS.length; i++) {
+    const cal = EMBED_CALENDARS[i];
+    const statusEl = statuses[i];
+    const text = await fetchViaProxy(cal.url);
+    if (!text) {
+      errors.push(cal.label);
+      if (statusEl) statusEl.textContent = '❌';
+      continue;
+    }
+    try {
+      const parsed = parseICS(text);
+      Object.entries(parsed).forEach(([date, titles]) => {
+        totalParsed[date] = [...(totalParsed[date] || []), ...titles];
+      });
+      if (statusEl) statusEl.textContent = '✅';
+    } catch(err) {
+      errors.push(cal.label);
+      if (statusEl) statusEl.textContent = '❌';
+    }
+  }
+
+  const count = Object.values(totalParsed).reduce((s, a) => s + a.length, 0);
+  if (count === 0) {
+    setSyncResult('❌ 全カレンダーの取得に失敗しました。ICSファイルを選択してください。', 'error');
+    return;
+  }
+  applyGCalEvents(totalParsed);
+  if (errors.length > 0) setSyncResult(`⚠️ 一部失敗 (${errors.join('、')})`, 'error');
+}
+
+// 旧関数名の互換
+function syncEmbedCalendar() { syncAllUrls(); }
+
+async function fetchICSUrl() {
+  const raw = document.getElementById('gcalUrlInput').value.trim();
+  if (!raw) { setSyncResult('⚠️ URLを入力してください', 'error'); return; }
+  setSyncResult('取得中…', '');
+
+  const proxies = [
+    u => `https://api.allorigins.win/raw?url=${encodeURIComponent(u)}`,
+    u => `https://corsproxy.io/?url=${encodeURIComponent(u)}`,
+    u => `https://thingproxy.freeboard.io/fetch/${u}`,
+  ];
+
+  let text = null;
+  for (const makeUrl of proxies) {
+    try {
+      const res = await fetch(makeUrl(raw));
+      if (!res.ok) continue;
+      const t = await res.text();
+      if (t.includes('BEGIN:VCALENDAR')) { text = t; break; }
+    } catch(_) { /* try next */ }
+  }
+
+  try {
+    if (!text) throw new Error('すべてのプロキシで取得に失敗しました。ICSファイルタブからファイルを直接選択してください。');
+    const parsed = parseICS(text);
+    const count = Object.values(parsed).reduce((s, a) => s + a.length, 0);
+    if (count === 0) { setSyncResult('⚠️ イベントが見つかりませんでした', 'error'); return; }
+    applyGCalEvents(parsed);
+  } catch(err) {
+    setSyncResult('❌ 取得エラー: ' + err.message, 'error');
+  }
+}
+
+function clearGCalEvents() {
+  if (!confirm('インポート済みのGoogleカレンダーデータをすべて削除しますか？')) return;
+  gcalEvents = {};
+  saveGCalEvents();
+  renderCalendar('sched');
+  document.getElementById('gcalStatus').textContent = '';
+  document.getElementById('gcalClearBtn').style.display = 'none';
+  setSyncResult('🗑️ 削除しました', '');
+}
+
+// ── Util ──────────────────────────────────────────
+function escHtml(s) {
+  return String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
+}
+
+function scrollToSection(id) {
+  const el = document.getElementById(id + 'Section');
+  if (el) el.scrollIntoView({ behavior: 'smooth', block: 'start' });
+}
+
+// ── 本日の予定はGoogleカレンダーのiframe埋め込み（週表示）で常時ライブ表示。──
+// JSでのデータ取得・レンダリングは不要（HTML側の <iframe class="gcal-embed"> を参照）。
+
+// ── 確認リスト ──────────────────────────────────────
+// PC(file://)とスマホ(Claude Artifact)を同期させる仕組み：
+//   - Artifact版として開かれた場合（window.claudeが使える場合）は db capability の
+//     confirm/main ドキュメントを共有ストアとして使い、他の端末からの変更もリアルタイムに反映する
+//   - ローカルファイルとして直接開かれた場合（window.claudeが無い）は、従来どおり
+//     localStorage（単体版「確認リスト管理ツール.html」と同じキー）にフォールバックする
+const CF_KEY = 'confirmListTool_v1';
+let cfState = cfLoadLocal();
+let cfEditing = { self: null };
+let cfDbRef = null; // 接続できた場合の db.doc('confirm/main')
+
+function cfLoadLocal() {
+  try {
+    const raw = localStorage.getItem(CF_KEY);
+    if (raw) return JSON.parse(raw);
+  } catch(e) {}
+  return { self: [], done: [] };
+}
+function cfSaveLocal() {
+  try { localStorage.setItem(CF_KEY, JSON.stringify(cfState)); } catch(e) {}
+}
+
+function cfSave() {
+  if (cfDbRef) {
+    cfDbRef.set(cfState).catch(e => console.warn('[confirm] db保存に失敗:', e));
+  } else {
+    cfSaveLocal();
+  }
+}
+
+async function cfInitSync() {
+  if (!window.claude || typeof window.claude.use !== 'function') return; // 通常のfile://ブラウザ
+  let db;
+  try { db = await window.claude.use('db'); } catch(e) { db = null; }
+  if (!db) return; // Artifact外、または権限なし
+
+  const ref = db.doc('confirm/main');
+
+  // dbにまだ何もなければ、このデバイスの既存ローカルデータを一度だけ引き継ぐ
+  try {
+    const snap = await ref.get();
+    if (!snap.exists && (cfState.self.length || cfState.done.length)) {
+      await ref.set(cfState);
+    }
+  } catch(e) { console.warn('[confirm] 初回引き継ぎに失敗:', e); }
+
+  cfDbRef = ref;
+  ref.onSnapshot(snap => {
+    if (snap.exists) {
+      const data = snap.data();
+      cfState = { self: data.self || [], done: data.done || [] };
+      cfRender();
+    }
+  }, e => console.warn('[confirm] 同期エラー:', e));
+}
+
+function cfFmtDue(due) {
+  if (!due) return '(期限なし)';
+  const [y,m,d] = due.split('-');
+  return `${m}/${d}`;
+}
+function cfDueClass(due) {
+  if (!due) return '';
+  const t = toDateStr(TODAY);
+  if (due < t) return 'cf-overdue';
+  if (due === t) return 'cf-today';
+  return '';
+}
+function cfId() { return 'i' + Math.random().toString(36).slice(2, 10); }
+
+function cfSubmit(type) {
+  const who  = document.getElementById(`cf-${type}-who`).value.trim();
+  const what = document.getElementById(`cf-${type}-what`).value.trim();
+  const due  = document.getElementById(`cf-${type}-due`).value;
+  if (!who || !what) { alert('相手と内容を入力してください'); return; }
+
+  if (cfEditing[type]) {
+    const item = cfState[type].find(x => x.id === cfEditing[type]);
+    if (item) { item.who = who; item.what = what; item.due = due; }
+    cfCancelEdit(type);
+  } else {
+    cfState[type].push({ id: cfId(), who, what, due });
+  }
+  cfSave();
+  document.getElementById(`cf-${type}-who`).value = '';
+  document.getElementById(`cf-${type}-what`).value = '';
+  document.getElementById(`cf-${type}-due`).value = '';
+  cfRender();
+}
+
+function cfStartEdit(type, id) {
+  const item = cfState[type].find(x => x.id === id);
+  if (!item) return;
+  document.getElementById(`cf-${type}-who`).value = item.who;
+  document.getElementById(`cf-${type}-what`).value = item.what;
+  document.getElementById(`cf-${type}-due`).value = item.due || '';
+  cfEditing[type] = id;
+  const btn = document.getElementById(`cf-${type}-btn`);
+  btn.textContent = '✓ 更新';
+  document.getElementById(`cf-${type}-cancel`).style.display = 'inline-block';
+}
+function cfCancelEdit(type) {
+  cfEditing[type] = null;
+  document.getElementById(`cf-${type}-who`).value = '';
+  document.getElementById(`cf-${type}-what`).value = '';
+  document.getElementById(`cf-${type}-due`).value = '';
+  document.getElementById(`cf-${type}-btn`).textContent = '＋ 追加';
+  document.getElementById(`cf-${type}-cancel`).style.display = 'none';
+}
+
+function cfComplete(type, id) {
+  const idx = cfState[type].findIndex(x => x.id === id);
+  if (idx < 0) return;
+  const item = cfState[type][idx];
+  cfState.done.unshift({ ...item, type, doneDate: toDateStr(TODAY) });
+  cfState[type].splice(idx, 1);
+  cfSave(); cfRender();
+}
+function cfDelete(type, id) {
+  if (!confirm('この項目を削除しますか？')) return;
+  cfState[type] = cfState[type].filter(x => x.id !== id);
+  cfSave(); cfRender();
+}
+function cfDeleteDone(id) {
+  cfState.done = cfState.done.filter(x => x.id !== id);
+  cfSave(); cfRender();
+}
+
+function cfRenderList(type) {
+  const rows = [...cfState[type]].sort((a, b) => {
+    if (!a.due) return 1; if (!b.due) return -1;
+    return a.due.localeCompare(b.due);
+  });
+  const tb = document.getElementById(`cf-tb-${type}`);
+  if (rows.length === 0) {
+    tb.innerHTML = `<tr><td colspan="4" class="cf-empty">現在、確認事項はありません</td></tr>`;
+    return;
+  }
+  tb.innerHTML = rows.map(r => `
+    <tr class="${cfDueClass(r.due)}">
+      <td class="cf-due">${cfFmtDue(r.due)}</td>
+      <td>${escHtml(r.who)}</td>
+      <td>${escHtml(r.what)}</td>
+      <td class="cf-op">
+        <button class="cf-mini cf-mini-done" onclick="cfComplete('${type}','${r.id}')">完了</button>
+        <button class="cf-mini cf-mini-edit" onclick="cfStartEdit('${type}','${r.id}')">✎</button>
+        <button class="cf-mini cf-mini-del" onclick="cfDelete('${type}','${r.id}')">✕</button>
+      </td>
+    </tr>`).join('');
+}
+
+function cfRenderDone() {
+  document.getElementById('cf-done-count').textContent = cfState.done.length;
+  const tb = document.getElementById('cf-tb-done');
+  if (cfState.done.length === 0) {
+    tb.innerHTML = `<tr><td colspan="5" class="cf-empty">完了した項目はまだありません</td></tr>`;
+    return;
+  }
+  tb.innerHTML = cfState.done.map(r => `
+    <tr>
+      <td class="cf-due">${r.doneDate}</td>
+      <td>${r.type === 'self' ? '🔵 確認・返答' : '🟢 進捗確認'}</td>
+      <td>${escHtml(r.who)}</td>
+      <td>${escHtml(r.what)}</td>
+      <td class="cf-op"><button class="cf-mini cf-mini-del" onclick="cfDeleteDone('${r.id}')">削除</button></td>
+    </tr>`).join('');
+}
+
+function cfRenderKpis() {
+  const t = toDateStr(TODAY);
+  const weekEnd = toDateStr(addDays(TODAY, 7));
+  const all = [...cfState.self];
+  const overdue = all.filter(x => x.due && x.due < t).length;
+  const dueToday = all.filter(x => x.due === t).length;
+  const dueWeek = all.filter(x => x.due && x.due > t && x.due <= weekEnd).length;
+
+  const badges = [];
+  if (overdue > 0) badges.push(`<span class="cf-badge warn">期限超過 ${overdue}</span>`);
+  if (dueToday > 0) badges.push(`<span class="cf-badge today">本日 ${dueToday}</span>`);
+  badges.push(`<span class="cf-badge">今週 ${dueWeek}</span>`);
+  document.getElementById('cfKpis').innerHTML = badges.join('');
+}
+
+function cfRender() {
+  cfRenderList('self');
+  cfRenderDone();
+  cfRenderKpis();
+  renderCfCalendar();
+}
+
+function renderCfCalendar() {
+  const dates = Array.from({length:7}, (_, i) => addDays(weekStart('cfcal'), i));
+  const start = dates[0], end = dates[6];
+
+  let label = `${start.getFullYear()}年${MONTH_NAMES[start.getMonth()]}`;
+  if (start.getMonth() !== end.getMonth()) {
+    const ySuffix = end.getFullYear() !== start.getFullYear() ? `${end.getFullYear()}年` : '';
+    label += ` - ${ySuffix}${MONTH_NAMES[end.getMonth()]}`;
+  }
+  document.getElementById('cfcalMonthLabel').textContent = label;
+
+  const headers = DAY_NAMES.map((d, i) =>
+    `<div class="cal-day-header ${i===0?'sun':i===6?'sat':''}">${d}</div>`
+  ).join('');
+
+  const cells = dates.map((d, i) => {
+    const ds = toDateStr(d);
+    const items = cfState.self.filter(x => x.due === ds);
+    const dayClass = i===0 ? 'sun' : i===6 ? 'sat' : '';
+    const todayCls = isSameDay(d, TODAY) ? ' today' : '';
+
+    const chips = items.map(item => {
+      const label = `${escHtml(item.who)}: ${escHtml(item.what)}`;
+      return `<div class="task-chip chip-confirm" onclick="scrollToSection('confirm')" title="${label}">${label}</div>`;
+    }).join('');
+
+    return `<div class="cal-cell ${dayClass}" onclick="scrollToSection('confirm')">
+      <div class="date-num${todayCls}">${d.getDate()}</div>
+      ${chips}
+    </div>`;
+  }).join('');
+
+  document.getElementById('cfcalGrid').innerHTML = headers + cells;
+}
+
+function cfExportJSON() {
+  const blob = new Blob([JSON.stringify(cfState, null, 2)], { type: 'application/json' });
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement('a');
+  a.href = url;
+  a.download = `確認リスト_バックアップ_${toDateStr(TODAY)}.json`;
+  a.click();
+  URL.revokeObjectURL(url);
+}
+function cfImportJSON(ev) {
+  const file = ev.target.files[0];
+  if (!file) return;
+  const reader = new FileReader();
+  reader.onload = e => {
+    try {
+      const data = JSON.parse(e.target.result);
+      if (!data.self || !data.done) throw new Error('形式が不正です');
+      if (!confirm('現在のデータを上書きして読み込みます。よろしいですか？')) return;
+      cfState = data;
+      cfSave(); cfRender();
+    } catch(err) { alert('読み込みに失敗しました: ' + err.message); }
+  };
+  reader.readAsText(file);
+  ev.target.value = '';
+}
+
+// ── Init ──────────────────────────────────────────
+renderProjects();
+renderCalendar('sched');
+cfRender();
+cfInitSync();
+</script>
+</body>
+</html>
